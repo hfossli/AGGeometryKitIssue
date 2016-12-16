@@ -8,6 +8,14 @@
 
 import UIKit
 
+func - (first: CGPoint, second: CGPoint) -> CGPoint {
+    return CGPoint(x: first.x - second.x, y: first.y - second.y)
+}
+
+func + (first: CGPoint, second: CGPoint) -> CGPoint {
+    return CGPoint(x: first.x + second.x, y: first.y + second.y)
+}
+
 class ViewController: UIViewController, UIGestureRecognizerDelegate {
     @IBOutlet weak var tlControl: UIView!
     @IBOutlet weak var trControl: UIView!
@@ -16,82 +24,112 @@ class ViewController: UIViewController, UIGestureRecognizerDelegate {
     
     @IBOutlet weak var target: UIView!
     
-    fileprivate var initialQuadrilateral: AGKQuad?
+    @IBOutlet weak var pinchRecognizer: UIPinchGestureRecognizer!
+    @IBOutlet weak var rotationRecognizer: UIRotationGestureRecognizer!
+    @IBOutlet weak var panRecognizer: UIPanGestureRecognizer!
+    
+    fileprivate var initialQuad: AGKQuad?
+    fileprivate var initialTouchLocation: CGPoint?
+    
+    fileprivate var lastScale: CGFloat = 1.0
+    fileprivate var lastRotation: CGFloat = 0.0
+    fileprivate var lastTranslation: CGPoint = CGPoint.zero
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         target.layer.ensureAnchorPointIsSetToZero()
+        
+        let quad = target.layer.quadrilateral
+        target.center = CGPoint.zero
+        target.layer.quadrilateral = quad
     }
     
     // MARK: Gesture handlers
     
+    @IBAction func handlePanInControlPoint(_ recognizer: UIPanGestureRecognizer) {
+        recognizer.view!.center = recognizer.view!.center + recognizer.translation(in: view)
+        recognizer.setTranslation(CGPoint.zero, in: recognizer.view!)
+        updateQuadrilateralByControlPoints()
+    }
+    
     @IBAction func handlePan(_ recognizer: UIPanGestureRecognizer) {
-        let t = recognizer.translation(in: view)
-        
-        if let view = recognizer.view {
-            applyTranslation(t, toView: view)
-            
-            if (view == target) {
-                applyTranslation(t, toView: tlControl)
-                applyTranslation(t, toView: trControl)
-                applyTranslation(t, toView: brControl)
-                applyTranslation(t, toView: blControl)
-            }
-        }
-        
-        recognizer.setTranslation(CGPoint.zero, in: self.view)
-        
-        target.layer.quadrilateral = AGKQuadMake(tlControl.center,
-                                                 trControl.center,
-                                                 brControl.center,
-                                                 blControl.center)
+        handleRecognizer(recognizer)
     }
     
     @IBAction func handlePinch(_ recognizer : UIPinchGestureRecognizer) {
-        if (recognizer.state == .began) {
-            initialQuadrilateral = target.layer.quadrilateral
-        }
-        
-        let transform = CGAffineTransform.identity.scaledBy(x: recognizer.scale, y: recognizer.scale)
-        target.layer.quadrilateral = AGKQuadApplyCGAffineTransform(initialQuadrilateral!, transform)
-        
-        updateControlPointsPosition()
+        handleRecognizer(recognizer)
     }
     
     @IBAction func handleRotation(_ recognizer : UIRotationGestureRecognizer) {
-        if (recognizer.state == .began) {
-            initialQuadrilateral = target.layer.quadrilateral
-        }
-        
-        let transform = CGAffineTransform.identity.rotated(by: recognizer.rotation)
-        target.layer.quadrilateral = AGKQuadApplyCGAffineTransform(initialQuadrilateral!, transform)
-        
-        updateControlPointsPosition()
+        handleRecognizer(recognizer)
     }
     
     // MARK: UIGestureRecognizerDelegate
-    
-    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        return true
-    }
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
     }
     
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
-        return true
-    }
-    
     // MARK: Private
     
-    fileprivate func applyTranslation(_ translation: CGPoint, toView view: UIView) {
-        view.center = CGPoint(x: view.center.x + translation.x,
-                              y: view.center.y + translation.y)
+    fileprivate func handleRecognizer(_ recognizer: UIGestureRecognizer) {
+        if initialQuad == nil, initialTouchLocation == nil {
+            initialQuad = target.layer.quadrilateral
+            initialTouchLocation = recognizer.location(in: view)
+            lastTranslation = CGPoint.zero
+            lastRotation = 0.0
+            lastScale = 1.0
+        }
+        
+        if isActive(recognizer: pinchRecognizer) {
+            lastScale = pinchRecognizer.scale
+        }
+        
+        if isActive(recognizer: rotationRecognizer) {
+            lastRotation = rotationRecognizer.rotation
+        }
+        
+        if isActive(recognizer: panRecognizer) {
+            lastTranslation = panRecognizer.translation(in: view)
+        }
+        
+        if let initialQuad = initialQuad, let initialTouchLocation = initialTouchLocation {
+            
+            let transform = CGAffineTransform.identity
+                .translatedBy(x: initialTouchLocation.x, y: initialTouchLocation.y)
+                .translatedBy(x: lastTranslation.x, y: lastTranslation.y)
+                .scaledBy(x: lastScale, y: lastScale)
+                .rotated(by: lastRotation)
+                .translatedBy(x: -initialTouchLocation.x, y: -initialTouchLocation.y)
+            
+            let quad = AGKQuadApplyCGAffineTransform(initialQuad, transform)
+            
+            target.layer.quadrilateral = quad
+            
+            updateControlPoints()
+        }
+        
+        if !isActive(recognizer: pinchRecognizer) && !isActive(recognizer: rotationRecognizer) && !isActive(recognizer: panRecognizer) {
+            initialQuad = nil
+            initialTouchLocation = nil
+        }
+    }
+    
+    fileprivate func isActive(recognizer: UIGestureRecognizer) -> Bool {
+        return recognizer.state == .began || recognizer.state == .changed
+    }
+    
+    fileprivate func updateQuad(_ quad: AGKQuad, translation: CGPoint, scale: CGFloat, rotation: CGFloat) {
+        
+    }
+    
+    fileprivate func updateQuadrilateralByControlPoints() {
+        let quad = AGKQuadMake(tlControl.center, trControl.center, brControl.center, blControl.center)
+        target.layer.quadrilateral = quad
     }
 
-    fileprivate func updateControlPointsPosition() {
+    fileprivate func updateControlPoints() {
         tlControl.center = target.layer.quadrilateral.tl
         trControl.center = target.layer.quadrilateral.tr
         brControl.center = target.layer.quadrilateral.br

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11542" systemVersion="16C67" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11542" systemVersion="16B2555" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -102,6 +102,9 @@
                     <connections>
                         <outlet property="blControl" destination="cFQ-VL-Rg1" id="tcb-J5-J4l"/>
                         <outlet property="brControl" destination="znT-KI-IsC" id="uJW-2p-kKo"/>
+                        <outlet property="panRecognizer" destination="7Ab-uC-frG" id="aOC-qR-iRU"/>
+                        <outlet property="pinchRecognizer" destination="vAS-P9-59O" id="Xxy-54-O41"/>
+                        <outlet property="rotationRecognizer" destination="60p-vZ-VkB" id="l5h-zd-vRq"/>
                         <outlet property="target" destination="BsO-Ra-rop" id="8cj-tU-YcX"/>
                         <outlet property="tlControl" destination="iii-rg-1lq" id="WZo-FR-qqd"/>
                         <outlet property="trControl" destination="EGH-qQ-YTz" id="qkn-Xs-Rje"/>
@@ -110,25 +113,25 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
                 <panGestureRecognizer minimumNumberOfTouches="1" id="Lz1-XN-Joa">
                     <connections>
-                        <action selector="handlePan:" destination="BYZ-38-t0r" id="Pcg-Kg-5dL"/>
+                        <action selector="handlePanInControlPoint:" destination="BYZ-38-t0r" id="yKH-Vu-1rZ"/>
                         <outlet property="delegate" destination="BYZ-38-t0r" id="ja8-iW-Iza"/>
                     </connections>
                 </panGestureRecognizer>
                 <panGestureRecognizer minimumNumberOfTouches="1" id="PNb-lA-MkC">
                     <connections>
-                        <action selector="handlePan:" destination="BYZ-38-t0r" id="8y5-mb-c6d"/>
+                        <action selector="handlePanInControlPoint:" destination="BYZ-38-t0r" id="sb8-MM-a4t"/>
                         <outlet property="delegate" destination="BYZ-38-t0r" id="cXv-lx-gic"/>
                     </connections>
                 </panGestureRecognizer>
                 <panGestureRecognizer minimumNumberOfTouches="1" id="XEU-b1-nSz">
                     <connections>
-                        <action selector="handlePan:" destination="BYZ-38-t0r" id="o21-yU-vPo"/>
+                        <action selector="handlePanInControlPoint:" destination="BYZ-38-t0r" id="17m-Qp-iZ4"/>
                         <outlet property="delegate" destination="BYZ-38-t0r" id="5kv-gC-ISe"/>
                     </connections>
                 </panGestureRecognizer>
                 <panGestureRecognizer minimumNumberOfTouches="1" id="7jb-aC-cn6">
                     <connections>
-                        <action selector="handlePan:" destination="BYZ-38-t0r" id="0A8-sp-Ivm"/>
+                        <action selector="handlePanInControlPoint:" destination="BYZ-38-t0r" id="Ooc-aZ-lAL"/>
                         <outlet property="delegate" destination="BYZ-38-t0r" id="Rpy-2b-S8p"/>
                     </connections>
                 </panGestureRecognizer>
