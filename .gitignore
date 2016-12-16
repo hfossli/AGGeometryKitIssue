@@ -114,3 +114,4 @@ iOSInjectionProject/
 ### Objective-C Patch ###
 *.xcscmblueprint
 
+.DS_Store
